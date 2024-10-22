@@ -6,12 +6,11 @@ WHERE user_name = 'sc_b2g_reader'
 
 SELECT * 
 FROM system.grants 
-WHERE role_name = 'sc_b2g_reader'
-  AND table = 'limited_view';
+WHERE role_name = 'sc_b2g_admin';
 
 ======================= sc_b2g_reader, *_sc_b2g_prod	*_sc_b2g	*_sc_b2c	*_sc_b2c_prod	*_ed_b2c
 
-Create role sc_b2g_reader;
+Create role sc_b2g_reader ON CLUSTER click;
 	GRANT ON CLUSTER click SELECT ON ods_sc_b2c_prod.* TO sc_b2g_reader; 
 	GRANT ON CLUSTER click SELECT ON ods_sc_b2g_prod.* TO sc_b2g_reader; 
 	GRANT ON CLUSTER click SELECT ON bdm_sc_b2g.* TO sc_b2g_reader; 
@@ -23,7 +22,7 @@ Create role sc_b2g_reader;
 
 ==================== sc_b2g_contributor  , *_sc_b2g_prod	*_sc_b2g	*_sc_b2c	*_sc_b2c_prod	*_ed_b2c
 
-Create role sc_b2g_contributor;
+Create role sc_b2g_contributor ON CLUSTER click;
 	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON ods_sc_b2c_prod.* TO sc_b2g_contributor; 
 	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON ods_sc_b2g_prod.* TO sc_b2g_contributor; 
 	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON bdm_sc_b2g.* TO sc_b2g_contributor; 
@@ -33,18 +32,18 @@ Create role sc_b2g_contributor;
 	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON bdm_ed_b2c.* TO sc_b2g_contributor; 
 	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON ods_ed_b2c.* TO sc_b2g_contributor; 
 
-	GRANT ON CLUSTER click ALTER CREATE DROP TABLE ON ods_sc_b2c_prod.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER CREATE DROP TABLE ON ods_sc_b2g_prod.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER CREATE DROP TABLE ON bdm_sc_b2g.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER CREATE DROP TABLE ON ods_sc_b2g  .* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER CREATE DROP TABLE ON bdm_sc_b2c.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER CREATE DROP TABLE ON ods_sc_b2c.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER CREATE DROP TABLE ON bdm_ed_b2c.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER CREATE DROP TABLE ON ods_ed_b2c.* TO sc_b2g_contributor; 
+	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON ods_sc_b2c_prod.* TO sc_b2g_contributor; 
+	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON ods_sc_b2g_prod.* TO sc_b2g_contributor; 
+	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON bdm_sc_b2g.* TO sc_b2g_contributor; 
+	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON ods_sc_b2g  .* TO sc_b2g_contributor; 
+	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON bdm_sc_b2c.* TO sc_b2g_contributor; 
+	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON ods_sc_b2c.* TO sc_b2g_contributor; 
+	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON bdm_ed_b2c.* TO sc_b2g_contributor; 
+	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON ods_ed_b2c.* TO sc_b2g_contributor; 
 
 ==================== sc_b2g_admin  , *_sc_b2g_prod	*_sc_b2g	*_sc_b2c	*_sc_b2c_prod	*_ed_b2c
 
-Create role sc_b2g_admin;
+Create role sc_b2g_admin ON CLUSTER click;
 	GRANT ON CLUSTER click ALL ON ods_sc_b2c_prod.* TO sc_b2g_admin WITH GRANT OPTION;
 	GRANT ON CLUSTER click ALL ON ods_sc_b2g_prod.* TO sc_b2g_admin WITH GRANT OPTION;
 	GRANT ON CLUSTER click ALL ON bdm_sc_b2g.* TO sc_b2g_admin WITH GRANT OPTION;
@@ -53,5 +52,17 @@ Create role sc_b2g_admin;
 	GRANT ON CLUSTER click ALL ON ods_sc_b2c.* TO sc_b2g_admin WITH GRANT OPTION;
 	GRANT ON CLUSTER click ALL ON bdm_ed_b2c.* TO sc_b2g_admin WITH GRANT OPTION;
 	GRANT ON CLUSTER click ALL ON ods_ed_b2c.* TO sc_b2g_admin WITH GRANT OPTION;
-	
+
+=============  dict_reader	*_dict t
+============= dict_contributor	*_dict rCwd
+=============  dict_admin	*_dict all
+
+============ meta_reader meta
+============ meta_contributor meta
+============ meta_admin meta
+
+
+============ cross_reader *_cross
+============ cross_contributor *_cross
+============ cross_admin *_cross
 
