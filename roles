@@ -1,0 +1,8 @@
+bdm_sc_b2c 
+
+Create role sc_b2g_reader;
+	•	GRANT ON ON CLUSTER SELECT ON bdm_sc_b2c.* TO sc_b2g_reader; — r
+	•	GRANT SELECT ON sc_b2g_contributor.* TO sc_b2g_reader; — rCwd
+	•	
+	•	GRANT SELECT ON sc_b2g_admin.* TO sc_b2g_reader;
+
