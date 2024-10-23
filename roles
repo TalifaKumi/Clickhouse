@@ -1,24 +1,60 @@
 
+SELECT database
+FROM system.tables
+WHERE database LIKE '%_sc_b2g%'
+GROUP BY database;
+
+SELECT    name,    origin
+FROM system.functions
+
+================================================ reader
+drop role sc_b2g_reader ON CLUSTER click;
+Create role sc_b2g_reader ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g%' GROUP BY database;
+
+drop role sc_b2с_reader ON CLUSTER click; 
+Create role sc_b2с_reader ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO sc_b2с_reader;' FROM system.tables WHERE database LIKE '%_sc_b2c%' GROUP BY database;
+
+drop role ed_b2c_reader ON CLUSTER click;  
+Create role ed_b2c_reader ON CLUSTER click;   
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO ed_b2c_reader;' FROM system.tables WHERE database LIKE '%_ed_b2c%' GROUP BY database;
+ 
+drop role dict_reader ON CLUSTER click;  
+Create role dict_reader ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO dict_reader;' FROM system.tables WHERE database LIKE '%_dict' GROUP BY database;
+
+drop role meta_reader ON CLUSTER click;  
+Create role meta_reader ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO meta_reader;' FROM system.tables WHERE database LIKE 'meta' GROUP BY database;
+
+drop role cross_reader ON CLUSTER click;  
+Create role cross_reader ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO cross_reader;' FROM system.tables WHERE database LIKE '%_cross' GROUP BY database;
+
+
+============================================ contributor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================================
 SELECT * 
 FROM system.grants 
 WHERE user_name = 'sc_b2g_reader'
   AND table = 'limited_view';
 
-SELECT * 
-FROM system.grants 
-WHERE role_name = 'sc_b2g_admin';
-
-======================= sc_b2g_reader, *_sc_b2g_prod	*_sc_b2g	*_sc_b2c	*_sc_b2c_prod	*_ed_b2c
-
-Create role sc_b2g_reader ON CLUSTER click;
-	GRANT ON CLUSTER click SELECT ON ods_sc_b2c_prod.* TO sc_b2g_reader; 
-	GRANT ON CLUSTER click SELECT ON ods_sc_b2g_prod.* TO sc_b2g_reader; 
-	GRANT ON CLUSTER click SELECT ON bdm_sc_b2g.* TO sc_b2g_reader; 
-	GRANT ON CLUSTER click SELECT ON ods_sc_b2g  .* TO sc_b2g_reader; 
-	GRANT ON CLUSTER click SELECT ON bdm_sc_b2c.* TO sc_b2g_reader; 
-	GRANT ON CLUSTER click SELECT ON ods_sc_b2c.* TO sc_b2g_reader; 
-	GRANT ON CLUSTER click SELECT ON bdm_ed_b2c.* TO sc_b2g_reader; 
-	GRANT ON CLUSTER click SELECT ON ods_ed_b2c.* TO sc_b2g_reader; 
 
 ==================== sc_b2g_contributor  , *_sc_b2g_prod	*_sc_b2g	*_sc_b2c	*_sc_b2c_prod	*_ed_b2c
 
