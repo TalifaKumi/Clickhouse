@@ -5,20 +5,25 @@ WHERE database LIKE '%_sc_b2g%'
 GROUP BY database;
 
 SELECT    name,    origin
-FROM system.functions
+FROM system.functions;
+
+SELECT * 
+FROM system.grants 
+WHERE user_name = 'sc_b2g_reader'
+  AND table = 'limited_view';
 
 ================================================ reader
 drop role sc_b2g_reader ON CLUSTER click;
 Create role sc_b2g_reader ON CLUSTER click; 
-SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g%' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g' GROUP BY database;
 
 drop role sc_b2с_reader ON CLUSTER click; 
 Create role sc_b2с_reader ON CLUSTER click; 
-SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO sc_b2с_reader;' FROM system.tables WHERE database LIKE '%_sc_b2c%' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO sc_b2с_reader;' FROM system.tables WHERE database LIKE '%_sc_b2c' GROUP BY database;
 
 drop role ed_b2c_reader ON CLUSTER click;  
 Create role ed_b2c_reader ON CLUSTER click;   
-SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO ed_b2c_reader;' FROM system.tables WHERE database LIKE '%_ed_b2c%' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO ed_b2c_reader;' FROM system.tables WHERE database LIKE '%_ed_b2c' GROUP BY database;
  
 drop role dict_reader ON CLUSTER click;  
 Create role dict_reader ON CLUSTER click; 
@@ -35,70 +40,57 @@ SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO cross_reader;' FROM
 
 ============================================ contributor
 
+drop role sc_b2g_contributor  ON CLUSTER click;  
+create role sc_b2g_contributor  ON CLUSTER click;  
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO sc_b2g_contributor;' FROM system.tables WHERE database LIKE '%_sc_b2g' GROUP BY database;
 
+drop role sc_b2с_contributor  ON CLUSTER click;  
+create role sc_b2с_contributor  ON CLUSTER click;  
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO sc_b2с_contributor;' FROM system.tables WHERE database LIKE '%_sc_b2c' GROUP BY database;
 
+drop role ed_b2c_contributor  ON CLUSTER click;  
+create role ed_b2c_contributor  ON CLUSTER click;  
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO ed_b2c_contributor;' FROM system.tables WHERE database LIKE '%_ed_b2c' GROUP BY database;
 
+drop role dict_contributor ON CLUSTER click;  
+Create role dict_contributor ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO dict_contributor;' FROM system.tables WHERE database LIKE '%_dict' GROUP BY database;
 
+drop role meta_contributor ON CLUSTER click;  
+Create role meta_contributor ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO meta_contributor;' FROM system.tables WHERE database LIKE 'meta' GROUP BY database;
 
+drop role cross_contributor ON CLUSTER click;  
+Create role cross_contributor ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO cross_contributor;' FROM system.tables WHERE database LIKE '%_cross' GROUP BY database;
 
+=============================================== admin
 
+drop role sc_b2g_admin  ON CLUSTER click;  
+create role sc_b2g_admin  ON CLUSTER click;  
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO sc_b2g_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE '%_sc_b2g' GROUP BY database;
 
+drop role sc_b2с_admin  ON CLUSTER click;  
+create role sc_b2с_admin  ON CLUSTER click;  
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO sc_b2с_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE '%_sc_b2c' GROUP BY database;
 
+drop role ed_b2c_admin ON CLUSTER click;  
+create role ed_b2c_admin  ON CLUSTER click;  
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO ed_b2c_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE '%_ed_b2c' GROUP BY database;
 
+drop role dict_admin ON CLUSTER click;  
+Create role dict_admin ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO dict_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE '%_dict' GROUP BY database;
 
+drop role meta_admin ON CLUSTER click;  
+Create role meta_admin ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO meta_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE 'meta' GROUP BY database;
+
+drop role cross_admin ON CLUSTER click;  
+Create role cross_admin ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO cross_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE '%_cross' GROUP BY database;
 
 
 
 ===============================================
-SELECT * 
-FROM system.grants 
-WHERE user_name = 'sc_b2g_reader'
-  AND table = 'limited_view';
-
-
-==================== sc_b2g_contributor  , *_sc_b2g_prod	*_sc_b2g	*_sc_b2c	*_sc_b2c_prod	*_ed_b2c
-
-Create role sc_b2g_contributor ON CLUSTER click;
-	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON ods_sc_b2c_prod.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON ods_sc_b2g_prod.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON bdm_sc_b2g.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON ods_sc_b2g  .* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON bdm_sc_b2c.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON ods_sc_b2c.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON bdm_ed_b2c.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click SELECT,INSERT,DELETE,UPDATE ON ods_ed_b2c.* TO sc_b2g_contributor; 
-
-	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON ods_sc_b2c_prod.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON ods_sc_b2g_prod.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON bdm_sc_b2g.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON ods_sc_b2g  .* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON bdm_sc_b2c.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON ods_sc_b2c.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON bdm_ed_b2c.* TO sc_b2g_contributor; 
-	GRANT ON CLUSTER click ALTER TABLE,CREATE TABLE, DROP TABLE ON ods_ed_b2c.* TO sc_b2g_contributor; 
-
-==================== sc_b2g_admin  , *_sc_b2g_prod	*_sc_b2g	*_sc_b2c	*_sc_b2c_prod	*_ed_b2c
-
-Create role sc_b2g_admin ON CLUSTER click;
-	GRANT ON CLUSTER click ALL ON ods_sc_b2c_prod.* TO sc_b2g_admin WITH GRANT OPTION;
-	GRANT ON CLUSTER click ALL ON ods_sc_b2g_prod.* TO sc_b2g_admin WITH GRANT OPTION;
-	GRANT ON CLUSTER click ALL ON bdm_sc_b2g.* TO sc_b2g_admin WITH GRANT OPTION;
-	GRANT ON CLUSTER click ALL ON ods_sc_b2g  .* TO sc_b2g_admin WITH GRANT OPTION;
-	GRANT ON CLUSTER click ALL ON bdm_sc_b2c.* TO sc_b2g_admin WITH GRANT OPTION;
-	GRANT ON CLUSTER click ALL ON ods_sc_b2c.* TO sc_b2g_admin WITH GRANT OPTION;
-	GRANT ON CLUSTER click ALL ON bdm_ed_b2c.* TO sc_b2g_admin WITH GRANT OPTION;
-	GRANT ON CLUSTER click ALL ON ods_ed_b2c.* TO sc_b2g_admin WITH GRANT OPTION;
-
-=============  dict_reader	*_dict t
-============= dict_contributor	*_dict rCwd
-=============  dict_admin	*_dict all
-
-============ meta_reader meta
-============ meta_contributor meta
-============ meta_admin meta
-
-
-============ cross_reader *_cross
-============ cross_contributor *_cross
-============ cross_admin *_cross
 
