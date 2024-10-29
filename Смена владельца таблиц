@@ -1,0 +1,13 @@
+Смена владельца таблиц
+SELECT database
+FROM system.tables
+--WHERE database LIKE '%_sc_b2g%'
+GROUP BY database;
+
+show table system.tables;
+
+select database,name FROM system.tables;
+
+use ods_ed_b2c ;
+SELECT * FROM system.tables WHERE name = 'posthog_clickhouse_events_json';
+
