@@ -15,42 +15,46 @@ WHERE user_name = 'sc_b2g_reader'
 ================================================ reader
 drop role sc_b2g_reader ON CLUSTER click;
 Create role sc_b2g_reader ON CLUSTER click; 
-SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g%' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click dictGet ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g%' GROUP BY database;
 
-drop role sc_b2с_reader ON CLUSTER click; 
-Create role sc_b2с_reader ON CLUSTER click; 
-SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO sc_b2с_reader;' FROM system.tables WHERE database LIKE '%_sc_b2c' GROUP BY database;
 
-drop role ed_b2c_reader ON CLUSTER click;  
+drop role sc_b2c_reader ON CLUSTER click; 
+Create role sc_b2c_reader ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO sc_b2c_reader;' FROM system.tables WHERE database LIKE '%_sc_b2c%' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click dictGet ON '||database||'.* TO sc_b2c_reader;' FROM system.tables WHERE database LIKE '%_sc_b2c%' GROUP BY database;
+
+  drop role ed_b2c_reader ON CLUSTER click;  
 Create role ed_b2c_reader ON CLUSTER click;   
-SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO ed_b2c_reader;' FROM system.tables WHERE database LIKE '%_ed_b2c' GROUP BY database;
- 
-drop role dict_reader ON CLUSTER click;  
-Create role dict_reader ON CLUSTER click; 
-SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO dict_reader;' FROM system.tables WHERE database LIKE '%_dict' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO ed_b2c_reader;' FROM system.tables WHERE database LIKE '%_ed_b2c%' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click dictGet ON '||database||'.* TO ed_b2c_reader;' FROM system.tables WHERE database LIKE '%_ed_b2c%' GROUP BY database;
 
-drop role meta_reader ON CLUSTER click;  
+   drop role dict_reader ON CLUSTER click;  
+Create role dict_reader ON CLUSTER click; 
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO dict_reader;' FROM system.tables WHERE database LIKE '%_dict%' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click dictGet ON '||database||'.* TO dict_reader;' FROM system.tables WHERE database LIKE '%_dict%' GROUP BY database;
+
+  drop role meta_reader ON CLUSTER click;  
 Create role meta_reader ON CLUSTER click; 
 SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO meta_reader;' FROM system.tables WHERE database LIKE 'meta' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click  dictGet  ON '||database||'.* TO meta_reader;' FROM system.tables WHERE database LIKE 'meta' GROUP BY database;
 
-drop role cross_reader ON CLUSTER click;  
+  drop role cross_reader ON CLUSTER click;  
 Create role cross_reader ON CLUSTER click; 
-SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO cross_reader;' FROM system.tables WHERE database LIKE '%_cross' GROUP BY database;
-
-
-============================================ contributor
+SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO cross_reader;' FROM system.tables WHERE database LIKE '%_cross' GROUP BY database; 
+SELECT 'GRANT ON CLUSTER dictGet ON '||database||'.* TO cross_reader;' FROM system.tables WHERE database LIKE '%_cross' GROUP BY database;   ============================================ contributor
 
 drop role sc_b2g_contributor  ON CLUSTER click;  
 create role sc_b2g_contributor  ON CLUSTER click;  
-SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO sc_b2g_contributor;' FROM system.tables WHERE database LIKE '%_sc_b2g' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO sc_b2g_contributor;' FROM system.tables WHERE database LIKE '%_sc_b2g%' GROUP BY database;
 
-drop role sc_b2с_contributor  ON CLUSTER click;  
-create role sc_b2с_contributor  ON CLUSTER click;  
-SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO sc_b2с_contributor;' FROM system.tables WHERE database LIKE '%_sc_b2c' GROUP BY database;
+drop role sc_b2c_contributor  ON CLUSTER click;  
+create role sc_b2c_contributor  ON CLUSTER click;  
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO sc_b2c_contributor;' FROM system.tables WHERE database LIKE '%_sc_b2c%' GROUP BY database;
 
 drop role ed_b2c_contributor  ON CLUSTER click;  
 create role ed_b2c_contributor  ON CLUSTER click;  
-SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO ed_b2c_contributor;' FROM system.tables WHERE database LIKE '%_ed_b2c' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO ed_b2c_contributor;' FROM system.tables WHERE database LIKE '%_ed_b2c%' GROUP BY database;
 
 drop role dict_contributor ON CLUSTER click;  
 Create role dict_contributor ON CLUSTER click; 
@@ -70,13 +74,13 @@ drop role sc_b2g_admin  ON CLUSTER click;
 create role sc_b2g_admin  ON CLUSTER click;  
 SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO sc_b2g_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE '%_sc_b2g' GROUP BY database;
 
-drop role sc_b2с_admin  ON CLUSTER click;  
-create role sc_b2с_admin  ON CLUSTER click;  
-SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO sc_b2с_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE '%_sc_b2c' GROUP BY database;
+drop role sc_b2c_admin  ON CLUSTER click;  
+create role sc_b2c_admin  ON CLUSTER click;  
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO sc_b2c_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE '%_sc_b2c%' GROUP BY database;
 
 drop role ed_b2c_admin ON CLUSTER click;  
 create role ed_b2c_admin  ON CLUSTER click;  
-SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO ed_b2c_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE '%_ed_b2c' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO ed_b2c_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE '%_ed_b2c%' GROUP BY database;
 
 drop role dict_admin ON CLUSTER click;  
 Create role dict_admin ON CLUSTER click; 
@@ -89,8 +93,4 @@ SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO meta_admin WITH GRANT 
 drop role cross_admin ON CLUSTER click;  
 Create role cross_admin ON CLUSTER click; 
 SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO cross_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE '%_cross' GROUP BY database;
-
-
-
-===============================================
 
