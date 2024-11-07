@@ -12,11 +12,62 @@ FROM system.grants
 WHERE user_name = 'sc_b2g_reader'
   AND table = 'limited_view';
 
+
+SELECT   user_name, arrayStringConcat(groupArray(granted_role_name), ','),'','' FROM system.role_grants GROUP BY user_name
+
+SELECT
+    rg.user_name,
+    rg.granted_role_name,
+    g.database,
+    g.access_type
+FROM system.role_grants AS rg, system.grants AS g where  rg.user_name = g.user_name and rg.granted_role_name = 'sc_b2g_contributor'
+
+SELECT    rg.user_name,    rg.granted_role_name,    g.database,    g.access_type, g.table, g.grant_option
+FROM system.role_grants AS rg, system.grants AS g where  rg.granted_role_name =  g.role_name and rg.user_name = 'a.malinovskiy';
+union all
+SELECT   rg.user_name, arrayStringConcat(groupArray(rg.granted_role_name), ',') , g.database,   g.access_type, g.grant_option
+FROM system.role_grants AS rg, system.grants  AS g 
+where  rg.user_name = g.user_name 
+and rg.user_name = 'a.malinovskiy'
+GROUP BY rg.user_name, g.database,
+    g.access_type,
+g.table, g.grant_option;
+
+
+
+SELECT    rg.user_name user_name,    rg.granted_role_name granted_role_name,    g.database database,    g.access_type access_type,  g.grant_option grant_option
+FROM system.role_grants AS rg, system.grants AS g where  rg.granted_role_name =  g.role_name and rg.user_name = 'a.malinovskiy'
+union DISTINCT
+SELECT   rg.user_name user_name, arrayStringConcat(groupArray(rg.granted_role_name), ',') granted_role_name , g.database database,   g.access_type access_type, g.grant_option grant_option
+FROM system.role_grants AS rg, system.grants  AS g 
+where  rg.user_name = g.user_name and rg.user_name = 'a.malinovskiy'
+GROUP BY rg.user_name, g.database,   g.access_type, g.table, g.grant_option;
+
+
+
+
+
+======================================
+
+GRANT CREATE TEMPORARY TABLE ON *.* TO user1, role2;
+
+
+
+
+
+
+
+
+
+
+
+
 ================================================ reader
 drop role sc_b2g_reader ON CLUSTER click;
 Create role sc_b2g_reader ON CLUSTER click; 
-SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g%' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click SELECT,INSERT ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g%' GROUP BY database;
 SELECT 'GRANT ON CLUSTER click dictGet ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g%' GROUP BY database;
+SELECT 'GRANT ON CLUSTER click SHOW ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g%' GROUP BY database;
 
 
 drop role sc_b2c_reader ON CLUSTER click; 
@@ -42,7 +93,9 @@ SELECT 'GRANT ON CLUSTER click  dictGet  ON '||database||'.* TO meta_reader;' FR
   drop role cross_reader ON CLUSTER click;  
 Create role cross_reader ON CLUSTER click; 
 SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO cross_reader;' FROM system.tables WHERE database LIKE '%_cross' GROUP BY database; 
-SELECT 'GRANT ON CLUSTER dictGet ON '||database||'.* TO cross_reader;' FROM system.tables WHERE database LIKE '%_cross' GROUP BY database;   ============================================ contributor
+SELECT 'GRANT ON CLUSTER dictGet ON '||database||'.* TO cross_reader;' FROM system.tables WHERE database LIKE '%_cross' GROUP BY database;   
+
+============================================ contributor
 
 drop role sc_b2g_contributor  ON CLUSTER click;  
 create role sc_b2g_contributor  ON CLUSTER click;  
@@ -93,4 +146,5 @@ SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO meta_admin WITH GRANT 
 drop role cross_admin ON CLUSTER click;  
 Create role cross_admin ON CLUSTER click; 
 SELECT 'GRANT ON CLUSTER click ALL ON '||database||'.* TO cross_admin WITH GRANT OPTION;' FROM system.tables WHERE database LIKE '%_cross' GROUP BY database;
+
 
