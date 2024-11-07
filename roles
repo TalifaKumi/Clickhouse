@@ -68,12 +68,14 @@ Create role sc_b2g_reader ON CLUSTER click;
 SELECT 'GRANT ON CLUSTER click SELECT,INSERT ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g%' GROUP BY database;
 SELECT 'GRANT ON CLUSTER click dictGet ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g%' GROUP BY database;
 SELECT 'GRANT ON CLUSTER click SHOW ON '||database||'.* TO sc_b2g_reader;' FROM system.tables WHERE database LIKE '%_sc_b2g%' GROUP BY database;
-
+CREATE TEMPORARY TABLE
 
 drop role sc_b2c_reader ON CLUSTER click; 
 Create role sc_b2c_reader ON CLUSTER click; 
 SELECT 'GRANT ON CLUSTER click SELECT ON '||database||'.* TO sc_b2c_reader;' FROM system.tables WHERE database LIKE '%_sc_b2c%' GROUP BY database;
 SELECT 'GRANT ON CLUSTER click dictGet ON '||database||'.* TO sc_b2c_reader;' FROM system.tables WHERE database LIKE '%_sc_b2c%' GROUP BY database;
+CREATE TEMPORARY TABLE
+
 
   drop role ed_b2c_reader ON CLUSTER click;  
 Create role ed_b2c_reader ON CLUSTER click;   
