@@ -1,0 +1,9 @@
+Если реплика отвечает
+Сode: 999. Coordination::Exception: Coordination error: No node
+Сode: 999. Coordination::Exception: Coordination error: Operation timeout
+Следует перезагрузить кипер(произойдет переподключение к кворуму)
+
+system restart replicas
+И попробовать восстановить реплику
+
+SYSTEM RESTORE REPLICA SCHEMA.TABLE;
