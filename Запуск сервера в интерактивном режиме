@@ -1,0 +1,4 @@
+
+(Весь системный вывод идет в консоль)
+
+sudo -u clickhouse clickhouse-server --config-file=/etc/clickhouse-server/config.xml
