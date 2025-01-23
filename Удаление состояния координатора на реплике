@@ -1,0 +1,23 @@
+rm -rf /var/lib/clickhouse/coordination
+Может потребоваться если реплика не может вернуться в кластер
+
+Встреченные симптомы
+
+ 
+1) Реплика запущена но не отвечает на входящие запросы по всем портам
+
+2)В логе можно увидеть проблему уровня синхронизации RAFT
+
+4.12.20 14:29:55.314256 [ 2647681 ] {} <Warning> RaftInstance: Election timeout, initiate leader election
+
+2024.12.20 14:29:55.314323 [ 2647681 ] {} <Warning> RaftInstance: total 1 nodes (including this node) responded for pre-vote (term 27, live 0, dead 1), at least 3 nodes should respond. failure count 468
+
+2024.12.20 14:29:55.314335 [ 2647681 ] {} <Warning> RaftInstance: failed to send prevote request: peer 4 (10.110.0.85:9234) is busy
+
+2024.12.20 14:29:55.314340 [ 2647681 ] {} <Warning> RaftInstance: failed to send prevote request: peer 3 (10.110.0.103:9234) is busy
+
+2024.12.20 14:29:55.314345 [ 2647681 ] {} <Warning> RaftInstance: failed to send prevote request: peer 1 (10.110.0.88:9234) is busy
+
+
+Вывод выше может быть получен если запустить реплики в интерактивном режиме
+
