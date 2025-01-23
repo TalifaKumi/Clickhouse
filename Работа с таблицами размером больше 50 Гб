@@ -1,0 +1,25 @@
+По дефолту нельзя удалять(drop) или очистить содержимое таблицы или партиции которая содержит более 50 Гб данных. Будет получена следующая ошибка
+
+
+
+Table or Partition in ...  not dropped.
+Reason:
+1. Size (111.56 GB) is greater than max_[table/partition]_size_to_drop (50.00 GB)
+2. File '/var/lib/clickhouse/flags/force_drop_table' intended to force DROP doesn't exist
+
+
+Самый простой способ обойти это ограничение использовать следующий параметр(отключаем проверку на размер таблицы в рамках запроса)
+
+
+... Settings max_table_size_to_drop=0;
+
+
+Например (не забываем про on cluster )
+
+
+drop table sber_profile.client_tag_book_2 on cluster click Settings max_table_size_to_drop=0;
+
+
+Либо создать файл-флаг который единожды позволит сделать drop
+
+sudo touch '/var/lib/clickhouse/flags/force_drop_table' && sudo chmod 666 '/var/lib/clickhouse/flags/force_drop_table'
