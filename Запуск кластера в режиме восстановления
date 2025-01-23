@@ -1,0 +1,4 @@
+
+Если проблемы вызваны с ошибками структуры таблицы. Проблемные парты будут получены из других реплик
+
+sudo -u clickhouse touch /var/lib/clickhouse/flags/force_restore_data
