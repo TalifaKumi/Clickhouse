@@ -1,0 +1,69 @@
+
+Проверка	Код	Ожидаемое значение	Критичность
+Проверяем есть ли таблицы которые реплицированны не на всех шардах	
+select  * from system.replicas  where mapValues(replica_is_active) !=[1,1,1,1] FORMAT Vertical;
+ 
+
+Статус репликации между нодами	
+SELECT
+ database,
+ `table`,
+ is_leader,
+ is_readonly,
+ is_session_expired,
+ future_parts,
+ parts_to_check,
+ columns_version,
+ queue_size,
+ inserts_in_queue,
+ merges_in_queue,
+ log_max_index,
+ log_pointer,
+ total_replicas,
+ active_replicas
+FROM system.replicas
+WHERE is_readonly OR is_session_expired OR (future_parts > 20) OR (parts_to_check > 10) OR (queue_size > 20) 
+OR (inserts_in_queue > 10) OR ((log_max_index - log_pointer) > 10) OR (total_replicas < 4) OR (active_replicas < total_replicas)
+ 
+
+Доступы пользователей и ролей сохранены	
+select * from system.grants
+	Не пустота - присутствуют основные роли	Medium
+В логе экземпляров нет ошибок	
+tail -n 50 /var/log/clickhouse-server/clickhouse-server.err.log
+	Отсутствие ошибок	High
+ZooKeeper доступен	
+select count() from system.zookeeper
+where path='/'
+	Не равно 1	Critical for writes
+ОшибкиZooKeeper	
+select value from system.events
+where event='ZooKeeperHardwareExceptions'
+	Пустота	Medium
+Read only таблицы на репликах	
+select value from system.metrics
+where metric='ReadonlyReplica'
+	Пустота	High
+Потерянные парты данных	
+select value from system.events
+where event='ReplicatedDataLoss'
+	Пустота	High
+Парты данные которые отличаются на репликах	
+select value from system.events where event='DataAfterMergeDiffersFromReplica'; 
+
+select value from system.events where event='DataAfterMutationDiffersFromReplica'
+	Пустота	Medium
+Ошибки Zookeeper касающиеся реплик	
+SELECT table,replica_is_active,zookeeper_exception
+
+FROM system.replicas where notEmpty(zookeeper_exception)
+
+FORMAT Vertical
+	Пустота	Medium
+Количество числа фоновых merge	
+SELECT * FROM system.metrics where metric ilike 'merge'
+	Больше нуля	Low
+Статус реплик в кластере	
+select cluster, shard_num, host_name, is_active, estimated_recovery_time, errors_count 
+from system.clusters where host_name!='localhost'
+	4 реплики ,без ошибок синхронизации 	High
