@@ -1,0 +1,168 @@
+Восстановление репликации или поехавшей агрегации, после того, как пропали данные в ZooKeeper, без конвертации реплицированной таблицы в нереплицируемую 1
+
+Если в логах у вас ошибки:
+
+
+Table is in readonly mode
+Cannot allocate block number in ZooKeeper: Coordination::Exception: Transaction failed (No node)
+Coordination::Exception: Can't get data for node /clickhouse/tables/*/*/log: node doesn't exist (No node).
+А при восстановлении или создании агрегации с POPULATE
+
+1
+Memory limit (for query) exceeded
+то эта статья для вас.
+
+ClickHouse, не болей
+ClickHouse, не болей
+
+Предупреждение
+Вы всё делаете на свой страх и риск.
+Автор не несёт ответственности за сохранность ваших данных.
+
+Восстанавливаем репликацию
+Собираем информацию
+Для начала нужно узнать, на сколько всё плохо с репликацией, потеряли ли мы все метаданные в ZooKeeper или только часть таблиц.
+Для этого можно воспользоваться как ZooKeeper клиентом, так и выполнить запрос напрямую из ClickHouse:
+
+
+SELECT zookeeper.name, tables.name as materialized_name
+FROM system.zookeeper
+         LEFT JOIN system.tables ON concat('.inner_id.', toString(tables.uuid)) = zookeeper.name
+WHERE path = '/clickhouse/tables/{DATABASE}' -- замените на имя своей БД
+ORDER BY name;
+Получим список таблиц, данные о которых есть в ZooKeeper:
+
+name	materialized_name
+.inner_id.b8915dd6-…	aggregating_my_data
+.inner_id.ed7d79c6-…	aggregating_my_data_2
+my_data	
+Далее стоит посмотреть, какие таблицы находятся в состоянии ReadOnly:
+
+SELECT replicas.database
+     , replicas.table
+     , tables.name AS materialized_name
+     , replicas.is_readonly
+--      , replicas.zookeeper_path
+--      , replicas.absolute_delay
+     , replicas.replica_is_active
+FROM system.replicas
+         LEFT JOIN system.tables ON concat('.inner_id.', toString(tables.uuid)) = replicas.table
+ORDER BY replicas.is_readonly DESC;
+Предположим, мы потеряли одну таблицу aggregating_my_data_3, она будет в состоянии ReadOnly:
+
+database	table	materialized_name	is_readonly	replica_is_active
+{DATABASE}	.inner_id.a4263b9a-…	aggregating_my_data_3	1	{}
+{DATABASE}	.inner_id.b8915dd6-…	aggregating_my_data	0	{‘ch1.blog.ghost.im’:1,‘ch2.blog.ghost.im’:1}
+{DATABASE}	.inner_id.ed7d79c6-…	aggregating_my_data_2	0	{‘ch1.blog.ghost.im’:1,‘ch2.blog.ghost.im’:1}
+{DATABASE}	my_data		0	{‘ch1.blog.ghost.im’:1,‘ch2.blog.ghost.im’:1}
+Восстанавливаем репликацию для таблицы
+Заметка
+В случае потери всех данных в ZooKeeper, вам просто придётся выполнить команды ниже для каждой таблицы.
+
+Восстановим metadata с помощью команды 2
+
+
+-- Из за того, что агрегированные таблицы имеют имена с точкой,
+-- необходимо заключать имя в обратные кавычки.
+SYSTEM RESTORE REPLICA {DATABASE}.`.inner_id.a4263b9a-...`;
+Есть возможность выполнить запрос сразу на кластере добавив ON CLUSTER '{cluster-name}';, но у меня эта команда приводила только к частичному восстановлению, поэтому советую выполнять команду на каждом сервере отдельно.
+Повторный запрос покажет статус восстановление Restore in progress. или если всё прошло успешно, будет ошибка Replica must be readonly.
+
+После выполнения запроса SYSTEM RESTORE REPLICA, должна появиться запись в ZooKeeper и сняться флаг is_readonly, а так же появится запись о сервере, который начал репликацию в replica_is_active (чтобы это проверить, выполните запросы снова, как мы это делали, когда собирали информацию).
+
+Восстанавливаем агрегацию (materialized view), если она сломалась.
+Восстановили мы данные, но к нашему несчастью, агрегированная таблица отстала, и данные, которые записывались в то время пока таблица была в ReadOnly не записаны в нашу агрегированную таблицу, или, что ещё хуже, таблица обнулилась и в ней есть данные только с момента восстановления.
+
+Думаю, лучшим способом будет пересоздать агрегацию, но это не так просто, как кажется на первый взгляд…
+
+Необходимо или остановить запись в ClickHouse или восстанавливать данные только до пересоздания агрегированной таблицы, чтобы данные не наложились друг на друга и мы не получили расхождения из-за дублирования данных.
+Я бы советовал остановить запись, если это возможно и данные где-то буферизуются до попадания в ClickHouse (как было сделано у меня). Можно обойтись и без остановки записи, далее опишу мысли на этот счёт, но я восстанавливал агрегацию остановив запись в ClickHouse.
+
+Пересоздаём materialized view
+Нужно удалить старую view или создать новую с другим именем.
+Если в запросе используется POPULATE и появляется ошибка Memory limit (for query) exceeded, то придётся создать view без неё и разбить заполнение на несколько более мелких запросов, как описано далее.
+
+Ошибка Memory limit (for query) exceeded и как её обойти, когда данных очень много.
+Предположим, запрос на создание агрегации выглядит так:
+
+
+CREATE MATERIALIZED VIEW {DATABASE}.aggregating_my_data_3
+            ON CLUSTER '{cluster-name}'
+            ENGINE = ReplicatedAggregatingMergeTree()
+                PARTITION BY toYYYYMM(timestampHour)
+                ORDER BY (user_id, timestampHour)
+AS
+SELECT user_id
+     , sumState(download)                                            AS download
+     , sumState(upload)                                              AS upload
+     -- Преобразовываем timestamp в timestamp по часам
+     , toDateTime(toInt64(toUnixTimestamp(timestamp) / 3600) * 3600) AS timestampHour
+FROM {DATABASE}.my_data
+GROUP BY user_id, timestampHour;
+Но в нашей таблице my_data более 5TB данных и за один запрос мы не можем восстановить агрегацию, для этого надо разбить на запросы по меньше используя WHERE (временной интервал подбирается опытным путём):
+
+
+SELECT user_id
+     , sumState(download)                                            AS download
+     , sumState(upload)                                              AS upload
+     -- Преобразовываем timestamp в timestamp по часам
+     , toDateTime(toInt64(toUnixTimestamp(timestamp) / 3600) * 3600) AS timestampHour
+FROM {DATABASE}.my_data
+WHERE toDate(timestamp) >= '2022-01-01'
+  AND toDate(timestamp) < '2022-01-10'
+GROUP BY user_id, timestampHour;
+Уже такой запрос не вызывает ошибки, но я всё же рекомендую поделить временной интервал на 2(очень рекомендую, так как потратил много времени на повторное восстановление, когда делал это первый раз), чтобы в какой-нибудь день не получилось больше информации и всё восстановление пойдёт насмарку из-за ошибки…
+
+Кстати
+Для увеличения доступной памяти запросу, необходимо использовать флаг:
+clickhouse-client --max_memory_usage 30G
+но не советую ставить его более 80% памяти на сервере.
+
+И в конечном счёте мы получим много запросов вида:
+
+
+-- 2022-01-01 - 2022-01-05
+INSERT
+INTO {DATABASE}.aggregating_my_data_3
+SELECT user_id
+     , sumState(download)                                            AS download
+     , sumState(upload)                                              AS upload
+     , toDateTime(toInt64(toUnixTimestamp(timestamp) / 3600) * 3600) AS timestampHour
+FROM {DATABASE}.my_data
+WHERE toDate(timestamp) >= '2022-01-01' -- Заменить
+  AND toDate(timestamp) < '2022-01-05' -- Заменить
+GROUP BY user_id, timestampHour;
+
+-- 2022-01-05 - 2022-01-10
+INSERT
+INTO {DATABASE}.aggregating_my_data_3
+SELECT user_id
+     , sumState(download)                                            AS download
+     , sumState(upload)                                              AS upload
+     , toDateTime(toInt64(toUnixTimestamp(timestamp) / 3600) * 3600) AS timestampHour
+FROM {DATABASE}.my_data
+WHERE toDate(timestamp) >= '2022-01-05' -- Заменить
+  AND toDate(timestamp) < '2022-01-10' -- Заменить
+GROUP BY user_id, timestampHour;
+
+-- 2022-01-10 - 2022-01-15
+INSERT
+INTO {DATABASE}.aggregating_my_data_3
+SELECT user_id
+     , sumState(download)                                            AS download
+     , sumState(upload)                                              AS upload
+     , toDateTime(toInt64(toUnixTimestamp(timestamp) / 3600) * 3600) AS timestampHour
+FROM {DATABASE}.my_data
+WHERE toDate(timestamp) >= '2022-01-10' -- Заменить
+  AND toDate(timestamp) < '2022-01-15' -- Заменить
+GROUP BY user_id, timestampHour;
+
+-- И так далее...
+для заполнения агрегации, в которой отличаются только даты.
+
+Если вы решили восстанавливать агрегацию без остановки записи в таблицу (что я бы не рекомендовал), то последний запрос должен иметь условие ДО даты создания агрегированной таблицы, например:
+
+1
+WHERE timestamp < '2022-01-01 13:14:15' -- Дата и время создания агрегированной таблицы
+
+https://ghost.im/posts/clickhouse-restore/
