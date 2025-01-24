@@ -166,3 +166,5 @@ GROUP BY user_id, timestampHour;
 WHERE timestamp < '2022-01-01 13:14:15' -- Дата и время создания агрегированной таблицы
 
 https://ghost.im/posts/clickhouse-restore/
+https://clickhouse.com/docs/ru/engines/table-engines/mergetree-family/replication#vosstanovlenie-v-sluchae-poteri-ili-povrezhdeniia-metadannykh-na-zookeeper-klastere
+https://clickhouse.com/docs/ru/sql-reference/statements/system#query_language-system-restore-replica
