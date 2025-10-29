@@ -5,8 +5,7 @@ Elapsed: 0.017 sec.
 Received exception from server (version 23.8.6):
 Code: 305. DB::Exception: Received from dnieto-zenbook.lan:9440. DB::Exception: We can't drop local replica, please use `DROP TABLE` if you want to clean the data and drop this replica. (TABLE_WAS_NOT_DROPPED)
 After DROP REPLICA, we need to check that the replica is gone from the list or replicas:
-SELECT DISTINCT arrayJoin(mapKeys(replica_is_active)) AS replica_name
-FROM system.replicas
+SELECT DISTINCT arrayJoin(mapKeys(replica_is_active)) AS replica_name FROM system.replicas;
 
 ┌─replica_name─┐
 │ arg_t01      │
